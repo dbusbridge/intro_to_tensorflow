@@ -1,0 +1,16 @@
+name: env_intro_tf
+dependencies:
+  - python=3.6.1
+  # Analysis
+  - matplotlib
+  - seaborn
+  # Calculations
+  - nomkl
+  - numpy
+  # Reporting
+  - tabulate
+  - pandas
+  # Packages
+  - pip
+  - pip:
+    - tensorflow
