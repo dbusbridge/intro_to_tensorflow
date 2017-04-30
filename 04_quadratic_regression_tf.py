@@ -7,15 +7,15 @@ import responses
 import network.architectures
 
 # Global configuration
-BIAS = 200
+BIAS = 2
 GRADIENT = 3
-X_RANGE_MIN, X_RANGE_MAX = -100, 100
+X_RANGE_MIN, X_RANGE_MAX = -1, 1
 N = 1000
 TEST_SIZE = 0.33
 
 # Create the data
 X = np.random.uniform(low=X_RANGE_MIN, high=X_RANGE_MAX, size=N)
-y = responses.quadratic(X, bias=BIAS, gradient=GRADIENT, noise_sd=10)
+y = responses.quadratic(X, bias=BIAS, gradient=GRADIENT, noise_sd=0)
 
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE)
@@ -32,7 +32,7 @@ y_test = y_test.reshape(y_test.size, 1)
 # Device to use, either '/cpu:<x>' or '/gpu:<x>'
 # DEVICE = '/cpu:0'
 DEVICE = '/gpu:0'
-TRAINING_EPOCHS = 100000
+TRAINING_EPOCHS = 25000
 
 # Start the session
 sess = tf.InteractiveSession()
@@ -40,7 +40,8 @@ sess = tf.InteractiveSession()
 # Build the computational graph
 # y_t = the true value of y
 # y_p = the predicted value of y
-x, y_t, y_p, w, b = network.architectures.linear_regression(device=DEVICE)
+x, y_t, y_p, w1, w2, b1, b2 = network.architectures.feed_forward_nn(
+    device=DEVICE)
 
 # Define the training step
 with tf.device(device_name_or_function=DEVICE):
@@ -53,8 +54,8 @@ sess.run(tf.global_variables_initializer())
 # Train me :D
 # (Comment on error versus noise)
 for e in range(TRAINING_EPOCHS):
-    _, w_val, b_val = sess.run(
-        (train_step, w, b), feed_dict={x: X_train, y_t: y_train})
+    _, w1_val, w2_val, b1_val, b2_val = sess.run(
+        (train_step, w1, w2, b1, b2), feed_dict={x: X_train, y_t: y_train})
 
     if e % 1000 == 0:
         train_error = cost.eval(feed_dict={x: X_train, y_t: y_train})
@@ -62,17 +63,17 @@ for e in range(TRAINING_EPOCHS):
         print(
             ', '.join(["epoch {e}",
                        "train error {train_error}",
-                       "test error {test_error}",
-                       "w {w_val}",
-                       "b {b_val}"]).format(
+                       "test error {test_error}"]).format(
                 e=e,
                 train_error=train_error,
-                test_error=test_error,
-                w_val=w_val[0],
-                b_val=b_val[0]))
+                test_error=test_error))
 
 # Plot results ################################################################
 plt.scatter(X_test, y_test,  color='black')
-plt.plot(X_test, y_p.eval(feed_dict={x: X_test}), color='red', linewidth=3)
+plt.plot(np.sort(X_test, axis=0),
+         y_p.eval(feed_dict={x: np.sort(X_test, axis=0)}),
+         color='red', linewidth=3)
+plt.xlabel("X")
+plt.ylabel("y")
 
 # plt.show()

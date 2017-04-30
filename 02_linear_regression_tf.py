@@ -32,7 +32,7 @@ y_test = y_test.reshape(y_test.size, 1)
 # Device to use, either '/cpu:<x>' or '/gpu:<x>'
 # DEVICE = '/cpu:0'
 DEVICE = '/gpu:0'
-TRAINING_EPOCHS = 100000
+TRAINING_EPOCHS = 50000
 
 # Start the session
 sess = tf.InteractiveSession()

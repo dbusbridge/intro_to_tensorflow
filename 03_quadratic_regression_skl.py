@@ -6,9 +6,9 @@ from sklearn.model_selection import train_test_split
 import responses
 
 # Global configuration
-BIAS = 200
+BIAS = 2
 GRADIENT = 3
-X_RANGE_MIN, X_RANGE_MAX = -100, 100
+X_RANGE_MIN, X_RANGE_MAX = -1, 1
 N = 1000
 TEST_SIZE = 0.33
 
