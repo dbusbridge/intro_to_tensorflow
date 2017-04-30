@@ -10,7 +10,7 @@ def linear(x, bias, gradient, noise_sd=0.01):
 # Quadratic gradient
 def quadratic(x, bias, gradient, noise_sd=0.01):
     noise = np.random.normal(scale=noise_sd, size=x.size)
-    return x * gradient + bias + noise
+    return (x ** 2) * gradient + bias + noise
 
 
 # Lambda

@@ -7,7 +7,7 @@ import responses
 import network.architectures
 
 # Global configuration
-BIAS = 2
+BIAS = 200
 GRADIENT = 3
 X_RANGE_MIN, X_RANGE_MAX = -100, 100
 N = 1000
@@ -15,7 +15,7 @@ TEST_SIZE = 0.33
 
 # Create the data
 X = np.random.uniform(low=X_RANGE_MIN, high=X_RANGE_MAX, size=N)
-y = responses.linear(X, bias=BIAS, gradient=GRADIENT, noise_sd=10)
+y = responses.quadratic(X, bias=BIAS, gradient=GRADIENT, noise_sd=10)
 
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE)
@@ -74,7 +74,5 @@ for e in range(TRAINING_EPOCHS):
 # Plot results ################################################################
 plt.scatter(X_test, y_test,  color='black')
 plt.plot(X_test, y_p.eval(feed_dict={x: X_test}), color='red', linewidth=3)
-plt.xlabel("X")
-plt.ylabel("y")
 
 # plt.show()
