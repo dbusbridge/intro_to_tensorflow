@@ -1,14 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 
 import responses
-
-# Pandas configuration
-pd.set_option("display.width", 1000)
-pd.set_option("max.rows", 10)
 
 # Global configuration
 BIAS = 2
@@ -28,7 +23,7 @@ X = X.reshape(X.size, 1)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE)
 
 
-# Scikit-learn ################################################################
+# SciKit-Learn ################################################################
 
 # Create linear regression object
 regr = linear_model.LinearRegression()
@@ -39,8 +34,8 @@ regr.fit(X_train, y_train)
 # The coefficients
 print('Coefficients: \n', regr.coef_)
 
-# Plot outputs
+# Plot results ################################################################
 plt.scatter(X_test, y_test,  color='black')
 plt.plot(X_test, regr.predict(X_test), color='blue', linewidth=3)
 
-plt.show()
+# plt.show()
