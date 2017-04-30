@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn import datasets, linear_model
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
 
 import responses
 
@@ -26,6 +26,9 @@ X = X.reshape(X.size, 1)
 
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE)
+
+
+# TensorFlow ##################################################################
 
 # Create linear regression object
 regr = linear_model.LinearRegression()
