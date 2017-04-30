@@ -7,15 +7,13 @@ import responses
 import network.architectures
 
 # Global configuration
-BIAS = 2
-GRADIENT = 3
-X_RANGE_MIN, X_RANGE_MAX = -1, 1
+X_RANGE_MIN, X_RANGE_MAX = -2 * np.pi, 2 * np.pi
 N = 1000
 TEST_SIZE = 0.33
 
 # Create the data
 X = np.random.uniform(low=X_RANGE_MIN, high=X_RANGE_MAX, size=N)
-y = responses.quadratic(X, bias=BIAS, gradient=GRADIENT, noise_sd=0.1)
+y = responses.general(X, f=lambda a: a * np.cos(a), noise_sd=0.1)
 
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE)

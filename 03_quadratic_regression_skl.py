@@ -14,7 +14,7 @@ TEST_SIZE = 0.33
 
 # Create the data
 X = np.random.uniform(low=X_RANGE_MIN, high=X_RANGE_MAX, size=N)
-y = responses.quadratic(X, bias=BIAS, gradient=GRADIENT, noise_sd=10)
+y = responses.quadratic(X, bias=BIAS, gradient=GRADIENT, noise_sd=0.1)
 
 # Reshape X to be a 2-dimensional array
 X = X.reshape(X.size, 1)
@@ -77,6 +77,6 @@ plt.ylabel("y")
 
 # plt.show()
 
-# Problem with this is that now seperate points in the X-feature space map to
+# Problem with this is that now separate points in the X-feature space map to
 # the same location in the X2 feature space. What if there are subtle
 # differences?
