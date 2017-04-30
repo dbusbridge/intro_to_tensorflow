@@ -1,2 +1,3 @@
-# intro_to_tensorflow
-Code for talk on introduction to tensorflow
+# Intro to TensorFlow
+Code for talk on introduction to TensorFlow
+
