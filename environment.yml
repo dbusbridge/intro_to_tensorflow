@@ -5,6 +5,7 @@ dependencies:
   - matplotlib
   - seaborn
   # Calculations
+  - scikit-learn
   - nomkl
   - numpy
   # Reporting
@@ -12,4 +13,4 @@ dependencies:
   # Packages
   - pip
   - pip:
-    - tensorflow
+    - tensorflow-gpu
