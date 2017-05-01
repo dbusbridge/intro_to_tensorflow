@@ -36,8 +36,8 @@ y_test = y_test.reshape(y_test.size, 1)
 # TensorFlow ##################################################################
 
 # Device to use, either '/cpu:<x>' or '/gpu:<x>'
-# DEVICE = '/cpu:0'
-DEVICE = '/gpu:0'
+DEVICE = '/cpu:0'
+# DEVICE = '/gpu:0'
 TRAINING_EPOCHS = 50000
 
 # Start the session
@@ -50,21 +50,38 @@ x, y_t, y_p, w, b = network.architectures.linear_regression(device=DEVICE)
 
 # Define the training step
 with tf.device(device_name_or_function=DEVICE):
-    cost = tf.reduce_mean(tf.square(y_p - y_t))
-    train_step = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
+    with tf.name_scope('cost'):
+        cost = tf.reduce_mean(tf.square(y_p - y_t))
+
+    with tf.name_scope('train'):
+        train_step = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
+
+merged = tf.summary.merge_all()
+train_writer = tf.summary.FileWriter('logs/train', sess.graph)
+test_writer = tf.summary.FileWriter('logs/test')
 
 # Initialise the variables
 sess.run(tf.global_variables_initializer())
 
 # Train me :D
+fd_train = {x: X_train, y_t: y_train}
+fd_test = {x: X_test, y_t: y_test}
+
 # (Comment on error versus noise)
 for e in range(TRAINING_EPOCHS):
-    _, w_val, b_val = sess.run(
-        (train_step, w, b), feed_dict={x: X_train, y_t: y_train})
+    _, w_val, b_val = sess.run((train_step, w, b), feed_dict=fd_train)
 
-    if e % 1000 == 0:
-        train_error = cost.eval(feed_dict={x: X_train, y_t: y_train})
-        test_error = cost.eval(feed_dict={x: X_test, y_t: y_test})
+    if e % 10 == 0:
+        summary_train = sess.run(merged, feed_dict=fd_train)
+        train_writer.add_summary(summary_train, e)
+
+        summary_test = sess.run(merged, feed_dict=fd_test)
+        test_writer.add_summary(summary_test, e)
+
+    if e % 100 == 0:
+        train_error, test_error = cost.eval(
+            feed_dict=fd_train), cost.eval(feed_dict=fd_test)
+
         print(
             ', '.join(["epoch {e}",
                        "train error {train_error}",
@@ -77,6 +94,9 @@ for e in range(TRAINING_EPOCHS):
                 w_val=w_val[0],
                 b_val=b_val[0]))
 
+train_writer.close()
+test_writer.close()
+
 # Plot results ################################################################
 plt.scatter(X_test, y_test,  color='black')
 plt.plot(X_test, y_p.eval(feed_dict={x: X_test}), color='red', linewidth=3)
@@ -84,3 +104,4 @@ plt.xlabel("X")
 plt.ylabel("y")
 
 # plt.show()
+# tensorboard --logdir=logs
