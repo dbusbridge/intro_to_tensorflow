@@ -22,6 +22,11 @@ X = X.reshape(X.size, 1)
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE)
 
+# Plot training data ##########################################################
+plt.scatter(X_train, y_train,  color='black')
+plt.xlabel("X")
+plt.ylabel("y")
+
 
 # SciKit-Learn ################################################################
 

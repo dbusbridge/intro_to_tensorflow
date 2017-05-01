@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn import linear_model
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
 import responses
@@ -22,61 +22,26 @@ X = X.reshape(X.size, 1)
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE)
 
+# Plot training data ##########################################################
+plt.scatter(X_train, y_train,  color='black')
+plt.xlabel("X")
+plt.ylabel("y")
+
 
 # SciKit-Learn ################################################################
 
 # Create linear regression object
-regr = linear_model.LinearRegression()
+regr_rf = RandomForestRegressor(max_depth=10)
 
 # Train the model using the training sets
-regr.fit(X_train, y_train)
-
-# The coefficients
-print('Coefficients: \n', regr.coef_)
+regr_rf.fit(X_train, y_train)
 
 # Plot results ################################################################
 plt.scatter(X_test, y_test,  color='black')
-plt.plot(X_test, regr.predict(X_test), color='blue', linewidth=3)
+plt.plot(np.sort(X_test, axis=0),
+         regr_rf.predict(np.sort(X_test, axis=0)),
+         color='blue', linewidth=3)
 plt.xlabel("X")
 plt.ylabel("y")
 
 # plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-# Try something else ##########################################################
-
-# Feature engineering
-X2_train, X2_test = X_train ** 2, X_test ** 2
-
-# SciKit-Learn (round two baby!) ##############################################
-
-# Create linear regression object
-regr2 = linear_model.LinearRegression()
-
-# Train the model using the training sets
-regr2.fit(X2_train, y_train)
-
-# The coefficients
-print('Coefficients: \n', regr2.coef_)
-
-# Plot results ################################################################
-plt.scatter(X2_test, y_test,  color='black')
-plt.plot(X2_test, regr2.predict(X2_test), color='blue', linewidth=3)
-plt.xlabel("X2")
-plt.ylabel("y")
-
-# plt.show()
-
-# Problem with this is that now separate points in the X-feature space map to
-# the same location in the X2 feature space. What if there are subtle
-# differences?

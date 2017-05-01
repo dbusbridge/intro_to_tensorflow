@@ -20,6 +20,12 @@ y = responses.linear(X, bias=BIAS, gradient=GRADIENT, noise_sd=10)
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE)
 
+# Plot training data ##########################################################
+plt.scatter(X_train, y_train,  color='black')
+plt.xlabel("X")
+plt.ylabel("y")
+
+
 # TensorFlow needs to have a hashable type of input
 X_train = X_train.reshape(X_train.size, 1)
 X_test = X_test.reshape(X_test.size, 1)
