@@ -140,4 +140,6 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+.idea/logs/
 .idea/
+logs/
