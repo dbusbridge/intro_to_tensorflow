@@ -34,8 +34,8 @@ y_test = y_test.reshape(y_test.size, 1)
 # TensorFlow ##################################################################
 
 # Device to use, either '/cpu:<x>' or '/gpu:<x>'
-# DEVICE = '/cpu:0'
-DEVICE = '/gpu:0'
+DEVICE = '/cpu:0'
+# DEVICE = '/gpu:0'
 TRAINING_EPOCHS = 25000
 
 # Start the session
