@@ -12,11 +12,11 @@ def add(a, b):
 # Graph of addition function with inputs
 def add_tf_graph():
     with tf.name_scope('inputs'):
-        a = tf.placeholder(tf.float32, shape=())
-        b = tf.placeholder(tf.float32, shape=())
+        a = tf.placeholder(tf.float32, shape=(), name="a")
+        b = tf.placeholder(tf.float32, shape=(), name="b")
 
     with tf.name_scope('outputs'):
-        r = tf.add(a, b)
+        r = tf.add(a, b, name="r")
 
     return a, b, r
 
@@ -31,7 +31,7 @@ sess.run(tf.global_variables_initializer())
 # Print if the results of the computation are the same
 result = sess.run(a_plus_b, feed_dict={a_input: 2., b_input: 5.})
 
-writer = tf.summary.FileWriter(log_dir + '1')
+writer = tf.summary.FileWriter(log_dir)
 writer.add_graph(sess.graph)
 
 print(result == add(2., 5.))

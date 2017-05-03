@@ -53,14 +53,14 @@ for x0 in x0s:
 # Sort of newtons-method-with-almost-10-lines-of-python-with-TensorFlow-with-
 # TensorBoard
 def newtons_method_tf_tb(f, x0, e):
-    log_path = os.path.join('logs/netwon', str(x0))
+    log_path = os.path.join('logs/newton', str(x0))
 
     with tf.name_scope('root'):
-        x0_tf = tf.Variable(initial_value=x0, dtype=tf.float32)
+        x0_tf = tf.Variable(initial_value=x0, dtype=tf.float32, name="x0")
         tf.summary.scalar('x0', x0_tf)
 
     with tf.name_scope('delta'):
-        loss = tf.abs(f(x0_tf))
+        loss = tf.abs(f(x0_tf), name="loss")
         tf.summary.scalar('loss', loss)
 
     with tf.name_scope('training'):
