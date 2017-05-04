@@ -12,19 +12,33 @@ def fizz_buzz_encode(i):
     elif i % 3  == 0: return np.array([0, 1, 0, 0])
     else:             return np.array([1, 0, 0, 0])
 
-# Our goal is to produce fizzbuzz for the numbers 1 to 500 and then to test it
-# on the numbers 501 to 1000
-start, stop, split_point = 1, 1000, 500
+# Our goal is to produce fizzbuzz for the numbers 1 to 100, training it on the
+# numbers 101 to 1000
+start, stop, split_point = 1, 1000, 100
 X = np.arange(start, stop + 1, 1, np.float32)
 y = np.array([fizz_buzz_encode(i) for i in X])
 
-X_train, X_test = X[:split_point], X[split_point:]
-y_train, y_test = y[:split_point], y[split_point:]
+X_test, X_train = X[:split_point], X[split_point:]
+y_test, y_train = y[:split_point], y[split_point:]
 
 
 # TensorFlow needs to have a hashable type of input
 X_train = X_train.reshape(X_train.size, 1)
 X_test = X_test.reshape(X_test.size, 1)
+
+
+# Try binary encoding
+# Represent each input by an array of its binary digits.
+# NUM_DIGITS = 10
+#
+#
+# def binary_encode(i, num_digits):
+#     return np.array([i >> d & 1 for d in range(num_digits)])
+#
+# X_train = np.array([binary_encode(int(i), NUM_DIGITS) for i in X_train],
+#                    dtype=np.float32)
+# X_test = np.array([binary_encode(int(i), NUM_DIGITS) for i in X_test],
+#                   dtype=np.float32)
 
 
 # We need a way to turn a prediction (and an original number)
@@ -38,17 +52,17 @@ def fizz_buzz(i, prediction):
 # Device to use, either '/cpu:<x>' or '/gpu:<x>'
 DEVICE = '/cpu:0'
 # DEVICE = '/gpu:0'
-TRAINING_EPOCHS = 100000
+TRAINING_EPOCHS = 5000
 
 # Build the computational graph
 # y_t = the true value of y
 # y_p = the predicted value of y
 x, y_t, y_p, w1, w2, b1, b2 = network.architectures.feed_forward_nn(
     device=DEVICE,
+    # input_layer_size=NUM_DIGITS,
     output_layer_size=4,
     n_neurons=128,
     end_activation=None)
-
 
 # Define the training step
 with tf.device(device_name_or_function=DEVICE):
@@ -86,5 +100,10 @@ for e in range(TRAINING_EPOCHS):
                 test_error=test_error,
                 test_accuracy=test_accuracy))
 
-y_train_predicted = sess.run(y_p, feed_dict={x: X_train})
 y_test_predicted = sess.run(y_p, feed_dict={x: X_test})
+
+for i in range(split_point):
+    print("N: {i}, Correct response: {c}, Predicted response: {p}".format(
+        i=i+1,
+        c=fizz_buzz(i, np.argmax(y_test_predicted[i])),
+        p=fizz_buzz(i, np.argmax(y_test[i]))))

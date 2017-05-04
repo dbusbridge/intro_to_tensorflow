@@ -27,6 +27,7 @@ def linear_regression(device='/cpu:0'):
 
 
 def feed_forward_nn(device='/cpu:0',
+                    input_layer_size=1,
                     output_layer_size=1,
                     n_neurons=50,
                     end_activation=None):
@@ -39,15 +40,18 @@ def feed_forward_nn(device='/cpu:0',
     """
     with tf.device(device_name_or_function=device):
         # Placeholders for feed and output
-        x = tf.placeholder(tf.float32, shape=[None, 1])
+        x = tf.placeholder(tf.float32, shape=[None, input_layer_size])
         y_true = tf.placeholder(tf.float32, shape=[None, output_layer_size])
 
         # First layer: Weights + bias
-        w1 = variables.weight(shape=[1, n_neurons])
+        w1 = variables.weight(shape=[input_layer_size, n_neurons])
         b1 = variables.bias(shape=[n_neurons])
 
         # Readout layer: perform linear transformation + bias with relu
-        h1 = tf.nn.relu(tf.multiply(x, w1) + b1)
+        if input_layer_size == 1:
+            h1 = tf.nn.relu(tf.multiply(x, w1) + b1)
+        else:
+            h1 = tf.nn.relu(tf.matmul(x, w1) + b1)
 
         # Second layer: Weights + bias
         w2 = variables.weight(shape=[n_neurons, output_layer_size])
