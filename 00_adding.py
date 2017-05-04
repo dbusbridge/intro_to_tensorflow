@@ -10,6 +10,7 @@ def add(a, b):
 
 
 # Graph of addition function with inputs
+# Change shape=() -> shape=(None, ) for batching
 def add_tf_graph():
     with tf.name_scope('inputs'):
         a = tf.placeholder(tf.float32, shape=(), name="a")
@@ -20,7 +21,6 @@ def add_tf_graph():
 
     return a, b, r
 
-
 # Construct a specific instance of the addition graph
 a_input, b_input, a_plus_b = add_tf_graph()
 
@@ -29,7 +29,7 @@ sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
 
 # Print if the results of the computation are the same
-result = sess.run(a_plus_b, feed_dict={a_input: 2., b_input: 5.})
+result = sess.run(a_plus_b, feed_dict={a_input: 2, b_input: 5})
 
 writer = tf.summary.FileWriter(log_dir)
 writer.add_graph(sess.graph)

@@ -2,7 +2,7 @@ import os
 
 import tensorflow as tf
 
-
+# 
 # http://danielhomola.com/2016/02/09/newtons-method-with-10-lines-of-python/
 def dx(f, x):
     return abs(f(x))
