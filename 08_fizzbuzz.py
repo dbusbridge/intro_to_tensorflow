@@ -2,12 +2,7 @@
 import numpy as np
 import tensorflow as tf
 
-NUM_DIGITS = 10
-
-
-# Represent each input by an array of its binary digits.
-def binary_encode(i, num_digits):
-    return np.array([i >> d & 1 for d in range(num_digits)])
+import network.architectures
 
 
 # One-hot encode the desired outputs: [number, "fizz", "buzz", "fizzbuzz"]
@@ -17,78 +12,79 @@ def fizz_buzz_encode(i):
     elif i % 3  == 0: return np.array([0, 1, 0, 0])
     else:             return np.array([1, 0, 0, 0])
 
-# Our goal is to produce fizzbuzz for the numbers 1 to 100. So it would be
-# unfair to include these in our training data. Accordingly, the training data
-# corresponds to the numbers 101 to (2 ** NUM_DIGITS - 1).
-trX = np.array([binary_encode(i, NUM_DIGITS) for i in range(101, 2 ** NUM_DIGITS)])
-trY = np.array([fizz_buzz_encode(i)          for i in range(101, 2 ** NUM_DIGITS)])
+# Our goal is to produce fizzbuzz for the numbers 1 to 500 and then to test it
+# on the numbers 501 to 1000
+start, stop, split_point = 1, 1000, 500
+X = np.arange(start, stop + 1, 1, np.float32)
+y = np.array([fizz_buzz_encode(i) for i in X])
+
+X_train, X_test = X[:split_point], X[split_point:]
+y_train, y_test = y[:split_point], y[split_point:]
 
 
-# We'll want to randomly initialize weights.
-def init_weights(shape):
-    return tf.Variable(tf.random_normal(shape, stddev=0.01))
+# TensorFlow needs to have a hashable type of input
+X_train = X_train.reshape(X_train.size, 1)
+X_test = X_test.reshape(X_test.size, 1)
 
 
-# Our model is a standard 1-hidden-layer multi-layer-perceptron with ReLU
-# activation. The softmax (which turns arbitrary real-valued outputs into
-# probabilities) gets applied in the cost function.
-def model(X, w_h, w_o):
-    h = tf.nn.relu(tf.matmul(X, w_h))
-    return tf.matmul(h, w_o)
-
-# Our variables. The input has width NUM_DIGITS, and the output has width 4.
-X = tf.placeholder("float", [None, NUM_DIGITS])
-Y = tf.placeholder("float", [None, 4])
-
-# How many units in the hidden layer.
-NUM_HIDDEN = 100
-
-# Initialize the weights.
-w_h = init_weights([NUM_DIGITS, NUM_HIDDEN])
-w_o = init_weights([NUM_HIDDEN, 4])
-
-# Predict y given x using the model.
-py_x = model(X, w_h, w_o)
-
-# We'll train our model by minimizing a cost function.
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=py_x))
-train_op = tf.train.GradientDescentOptimizer(0.05).minimize(cost)
-
-# And we'll make predictions by choosing the largest output.
-predict_op = tf.argmax(py_x, 1)
-
-
-# Finally, we need a way to turn a prediction (and an original number)
+# We need a way to turn a prediction (and an original number)
 # into a fizz buzz output
 def fizz_buzz(i, prediction):
     return [str(i), "fizz", "buzz", "fizzbuzz"][prediction]
 
-BATCH_SIZE = 128
+
+# TensorFlow ##################################################################
+
+# Device to use, either '/cpu:<x>' or '/gpu:<x>'
+DEVICE = '/cpu:0'
+# DEVICE = '/gpu:0'
+TRAINING_EPOCHS = 100000
+
+# Build the computational graph
+# y_t = the true value of y
+# y_p = the predicted value of y
+x, y_t, y_p, w1, w2, b1, b2 = network.architectures.feed_forward_nn(
+    device=DEVICE,
+    output_layer_size=4,
+    n_neurons=128,
+    end_activation=None)
+
+
+# Define the training step
+with tf.device(device_name_or_function=DEVICE):
+    cost = tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(labels=y_t, logits=y_p))
+    train_step = tf.train.AdamOptimizer(learning_rate=1e-3).minimize(cost)
+    correct_prediction = tf.equal(tf.argmax(y_p, 1), tf.argmax(y_t, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
 
 # Launch the graph in a session
 sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
-for e in range(5000):
-    # Shuffle the data before each training iteration.
-    p = np.random.permutation(range(len(trX)))
-    trX, trY = trX[p], trY[p]
 
-    # Train in batches of 128 inputs.
-    for start in range(0, len(trX), BATCH_SIZE):
-        end = start + BATCH_SIZE
-        sess.run(train_op, feed_dict={X: trX[start:end], Y: trY[start:end]})
+# Train it
+for e in range(TRAINING_EPOCHS):
+    _, w1_val, w2_val, b1_val, b2_val = sess.run(
+        (train_step, w1, w2, b1, b2), feed_dict={x: X_train, y_t: y_train})
 
-    if e % 100 == 0:
-        # And print the current accuracy on the training data.
-        print("epoch: ", e,
-              "training accuracy:",
-              np.mean(np.argmax(trY, axis=1) ==
-                      sess.run(predict_op, feed_dict={X: trX, Y: trY})))
+    if e % 1000 == 0:
+        train_error, train_accuracy = sess.run(
+            (cost, accuracy), feed_dict={x: X_train, y_t: y_train})
+        test_error, test_accuracy = sess.run(
+            (cost, accuracy), feed_dict={x: X_test, y_t: y_test})
 
-# And now for some fizz buzz
-numbers = np.arange(1, 1001)
-teX = np.transpose(binary_encode(numbers, NUM_DIGITS))
-teY = sess.run(predict_op, feed_dict={X: teX})
-output = np.vectorize(fizz_buzz)(numbers, teY)
+        print(
+            ', '.join(["epoch {e}",
+                       "train error {train_error}",
+                       "train accuracy {train_accuracy}",
+                       "test error {test_error}",
+                       "test accuracy {test_accuracy}"]).format(
+                e=e,
+                train_error=train_error,
+                train_accuracy=train_accuracy,
+                test_error=test_error,
+                test_accuracy=test_accuracy))
 
-print(output)
+y_train_predicted = sess.run(y_p, feed_dict={x: X_train})
+y_test_predicted = sess.run(y_p, feed_dict={x: X_test})

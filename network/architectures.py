@@ -26,7 +26,10 @@ def linear_regression(device='/cpu:0'):
     return x, y_true, y_pred, w, b
 
 
-def feed_forward_nn(device='/cpu:0'):
+def feed_forward_nn(device='/cpu:0',
+                    output_layer_size=1,
+                    n_neurons=50,
+                    end_activation=None):
     """Create a neural network that has one hidden layer.
     :param str device: The device to use for storing variables and computation.
         Either '/cpu:<n>' or '/cpu:<n>'. Defaults to '/cpu:<n>.
@@ -37,19 +40,22 @@ def feed_forward_nn(device='/cpu:0'):
     with tf.device(device_name_or_function=device):
         # Placeholders for feed and output
         x = tf.placeholder(tf.float32, shape=[None, 1])
-        y_true = tf.placeholder(tf.float32, shape=[None, 1])
+        y_true = tf.placeholder(tf.float32, shape=[None, output_layer_size])
 
         # First layer: Weights + bias
-        w1 = variables.weight(shape=[1, 50])
-        b1 = variables.bias(shape=[50])
+        w1 = variables.weight(shape=[1, n_neurons])
+        b1 = variables.bias(shape=[n_neurons])
 
         # Readout layer: perform linear transformation + bias with relu
         h1 = tf.nn.relu(tf.multiply(x, w1) + b1)
 
         # Second layer: Weights + bias
-        w2 = variables.weight(shape=[50, 1])
-        b2 = variables.bias(shape=[1])
+        w2 = variables.weight(shape=[n_neurons, output_layer_size])
+        b2 = variables.bias(shape=[output_layer_size])
 
-        y_pred = tf.matmul(h1, w2) + b2
+        if end_activation is None:
+            y_pred = tf.matmul(h1, w2) + b2
+        else:
+            y_pred = end_activation(tf.matmul(h1, w2) + b2)
 
     return x, y_true, y_pred, w1, w2, b1, b2
